@@ -23,8 +23,8 @@
   });
   document.querySelectorAll('[data-reseau]').forEach(function(a){
     var u = urlDe(a.dataset.reseau);
-    if(u){ a.href = u; a.target = '_blank'; a.rel = 'noopener'; }
-    else { a.removeAttribute('href'); a.title = a.getAttribute('aria-label') + ' · bientôt'; }
+    var etat = a.querySelector('.reseau-etat');
+    if(u){ a.href = u; a.target = '_blank'; a.rel = 'noopener'; if(etat) etat.textContent = 'Nous suivre'; }
   });
   var noms = {youtube:'YouTube',tiktok:'TikTok',instagram:'Instagram',linkedin:'LinkedIn',email:'Contact'};
   var pied = $('#pied-liens');
