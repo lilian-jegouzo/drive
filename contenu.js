@@ -56,14 +56,14 @@ window.DRIVE = {
   equipe: [
     {
       nom: 'Lilian Jégouzo',
-      role: 'Co-fondateur · au volant ou à l’interview',
-      bio: 'Étudiant à ESCP Business School. Se destine à la finance de marché, entre trading et structuration.',
+      role: 'Co-fondateur · au volant',
+      bio: 'Étudiant à ESCP Business School. Se destine à la structuration.',
       linkedin: ''
     },
     {
-      nom: 'Prénom Nom',
-      role: 'Co-fondateur · au volant ou à l’interview',
-      bio: 'Étudiant à ESCP Business School. Se destine à la finance de marché, entre trading et structuration.',
+      nom: 'Raphaël Chouraqui',
+      role: 'Co-fondateur · à l’interview',
+      bio: 'Étudiant à ESCP Business School. Se destine au trading.',
       linkedin: ''
     }
   ]

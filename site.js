@@ -21,6 +21,11 @@
     else if(a.dataset.lien==='email'){ a.hidden = true; }
     else if(a.classList.contains('lien-fleche')){ a.hidden = true; }
   });
+  document.querySelectorAll('[data-reseau]').forEach(function(a){
+    var u = urlDe(a.dataset.reseau);
+    if(u){ a.href = u; a.target = '_blank'; a.rel = 'noopener'; }
+    else { a.removeAttribute('href'); a.title = a.getAttribute('aria-label') + ' · bientôt'; }
+  });
   var noms = {youtube:'YouTube',tiktok:'TikTok',instagram:'Instagram',linkedin:'LinkedIn',email:'Contact'};
   var pied = $('#pied-liens');
   Object.keys(noms).forEach(function(k){

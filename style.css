@@ -21,13 +21,19 @@ h2,h3,.large{font-stretch:125%;font-weight:900;letter-spacing:-0.01em;line-heigh
 /* Barre du haut */
 .barre{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:24px;padding:14px var(--marge);padding-top:calc(14px + env(safe-area-inset-top,0px));background:rgba(255,255,255,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .marque{display:flex;align-items:center;gap:10px;text-decoration:none}
-.marque-d{width:30px;height:auto}
+.marque-d{height:40px;width:auto}
 .marque-mot{font-stretch:125%;font-weight:900;font-size:22px;letter-spacing:.01em;line-height:1}
-body.logo-vitesse .marque-d,body.logo-vitesse .marque-mot,body.logo-vitesse .pied-mot{transform:skewX(var(--penche))}
+body.logo-vitesse .marque-mot,body.logo-vitesse .pied-mot{transform:skewX(var(--penche))}
 .nav{display:flex;gap:28px;margin-left:auto}
 .nav a{text-decoration:none;font-weight:500;font-size:15px}
 .nav a:hover{text-decoration:underline;text-underline-offset:5px}
-@media (max-width:760px){.nav{display:none}.barre .bouton{margin-left:auto}}
+.reseaux{display:flex;align-items:center;gap:14px;padding-left:24px;border-left:1px solid var(--trait)}
+.reseaux-titre{font-weight:500;font-size:15px;color:var(--gris);margin-right:2px}
+.reseau{display:block;transition:transform .2s}
+.reseau img{height:30px;width:auto}
+a.reseau[href]:hover{transform:translateY(-2px) scale(1.06)}
+.reseau:not([href]){cursor:default}
+@media (max-width:760px){.nav{display:none}.reseaux{margin-left:auto;gap:12px;padding-left:0;border-left:0}.reseaux-titre{display:none}.reseau img{height:26px}}
 
 .bouton{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:15px 26px;font:600 16px var(--f);text-decoration:none;white-space:nowrap;transition:opacity .2s}
 .bouton:hover{opacity:.82}
@@ -97,7 +103,7 @@ body.logo-vitesse .hero-repli{transform:skewX(var(--penche))}
 .membre a{display:inline-block;margin-top:14px;font-weight:600;text-underline-offset:5px}
 
 /* Ressources */
-.ressources{display:grid;grid-template-columns:1.4fr 1fr;gap:56px}
+.ressources{display:grid;max-width:980px}
 .ressources h3{font-size:clamp(24px,2.6vw,34px);margin-bottom:24px}
 .lexique{display:grid;grid-template-columns:minmax(120px,190px) 1fr;border-top:1px solid var(--noir)}
 .lexique dt,.lexique dd{padding:14px 0;border-bottom:1px solid var(--trait)}

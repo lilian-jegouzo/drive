@@ -21,8 +21,7 @@
 
 <header class="barre">
   <a class="marque" href="./" aria-label="DRIVE, accueil">
-    <img class="marque-d" src="assets/logo-d.svg" alt="" width="34" height="29">
-    <span class="marque-mot">DRIVE</span>
+    <img class="marque-d" src="assets/logos/d-chrome.png" alt="DRIVE" width="54" height="42">
   </a>
   <nav class="nav" aria-label="Navigation principale">
     <a href="#episodes">Épisodes</a>
@@ -30,7 +29,13 @@
     <a href="#equipe">L’équipe</a>
     <a href="#ressources">Ressources</a>
   </nav>
-  <a class="bouton bouton-noir petit" data-lien="youtube" href="#episodes">YouTube</a>
+  <div class="reseaux" aria-label="Réseaux">
+    <span class="reseaux-titre">Réseaux</span>
+    <a class="reseau" data-reseau="youtube" aria-label="YouTube"><img src="assets/logos/youtube-chrome.png" alt="" width="44" height="32"></a>
+    <a class="reseau" data-reseau="tiktok" aria-label="TikTok"><img src="assets/logos/tiktok-chrome.png" alt="" width="28" height="32"></a>
+    <a class="reseau" data-reseau="instagram" aria-label="Instagram"><img src="assets/logos/instagram-chrome.png" alt="" width="31" height="32"></a>
+    <a class="reseau" data-reseau="linkedin" aria-label="LinkedIn"><img src="assets/logos/linkedin-chrome.png" alt="" width="31" height="32"></a>
+  </div>
 </header>
 
 <main>
@@ -64,7 +69,7 @@
 
   <section id="equipe" class="bloc bloc-noir">
     <div class="bloc-tete"><h2>L’équipe</h2></div>
-    <p class="equipe-intro">Deux étudiants d’ESCP Business School, 21 et 22 ans, qui se destinent aux métiers des marchés. DRIVE est né d’une envie simple : poser aux professionnels les questions qu’on se pose vraiment.</p>
+    <p class="equipe-intro">Deux étudiants d’ESCP Business School qui se destinent aux métiers des marchés. DRIVE est né d’une envie simple : poser aux professionnels les questions qu’on se pose vraiment.</p>
     <div id="liste-equipe" class="equipe"></div>
   </section>
 
@@ -87,18 +92,6 @@
           <dt>Market making</dt><dd>Coter en permanence un prix d’achat et un prix de vente, et gagner l’écart entre les deux.</dd>
           <dt>P&amp;L</dt><dd>Profit and loss : le résultat, gain ou perte, d’une position ou d’un desk.</dd>
         </dl>
-      </div>
-      <div>
-        <h3>Les livres</h3>
-        <ul class="livres">
-          <li><b>Options, Futures and Other Derivatives</b><span>John C. Hull. La référence sur les dérivés.</span></li>
-          <li><b>Option Volatility and Pricing</b><span>Sheldon Natenberg. La bible des traders d’options.</span></li>
-          <li><b>Volatility Trading</b><span>Euan Sinclair. Trader la volatilité, concrètement.</span></li>
-          <li><b>Dynamic Hedging</b><span>Nassim Nicholas Taleb. La couverture vue par un praticien.</span></li>
-          <li><b>Heard on the Street</b><span>Timothy Falcon Crack. Les questions d’entretien quant et trading.</span></li>
-          <li><b>A Practical Guide to Quantitative Finance Interviews</b><span>Xinfeng Zhou. Le « green book » des candidats.</span></li>
-          <li><b>Liar’s Poker</b><span>Michael Lewis. Une salle de marché des années 80, de l’intérieur.</span></li>
-        </ul>
       </div>
     </div>
   </section>
