@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DRIVE · La finance de marché, en voiture</title>
+<meta name="description" content="DRIVE, le podcast vidéo tourné en voiture : des interviews avec celles et ceux qui font les marchés financiers. Animé par deux étudiants d’ESCP.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="DRIVE · La finance de marché, en voiture">
+<meta property="og:description" content="Des interviews en voiture avec celles et ceux qui font les marchés financiers.">
+<meta property="og:image" content="https://lilian-jegouzo.github.io/drive/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="barre">
+  <a class="marque" href="./" aria-label="DRIVE, accueil">
+    <img class="marque-d" src="assets/logo-d.svg" alt="" width="34" height="29">
+    <span class="marque-mot">DRIVE</span>
+  </a>
+  <nav class="nav" aria-label="Navigation principale">
+    <a href="#episodes">Épisodes</a>
+    <a href="#articles">Articles</a>
+    <a href="#equipe">L’équipe</a>
+    <a href="#ressources">Ressources</a>
+  </nav>
+  <a class="bouton bouton-noir petit" data-lien="youtube" href="#episodes">YouTube</a>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="titre">
+    <div id="scene" class="scene" aria-hidden="true"></div>
+    <h1 id="titre" class="hero-repli">DRIVE</h1>
+    <div class="hero-bas">
+      <p class="accroche">La finance<br>de marché,<br>en voiture.</p>
+      <p class="hero-texte">Des interviews avec celles et ceux qui font les marchés. Un conducteur, un intervieweur, un invité à l’arrière, et une heure de route.</p>
+    </div>
+  </section>
+
+  <section class="format">
+    <div class="format-ligne"><span class="format-mot">Le conducteur.</span><span class="format-desc">Garde le cap, et relance quand il faut.</span></div>
+    <div class="format-ligne"><span class="format-mot">L’intervieweur.</span><span class="format-desc">Pose les questions qu’on n’ose pas poser en entretien.</span></div>
+    <div class="format-ligne"><span class="format-mot">L’invité.</span><span class="format-desc">Trader, structureur, sales, gérant, figure publique. Assis à l’arrière.</span></div>
+  </section>
+
+  <section id="episodes" class="bloc">
+    <div class="bloc-tete">
+      <h2>Épisodes</h2>
+      <a class="lien-fleche" data-lien="youtube" href="#">Tous les épisodes sur YouTube</a>
+    </div>
+    <div id="liste-episodes" class="episodes"></div>
+  </section>
+
+  <section id="articles" class="bloc">
+    <div class="bloc-tete"><h2>Articles</h2></div>
+    <div id="liste-articles" class="articles"></div>
+  </section>
+
+  <section id="equipe" class="bloc bloc-noir">
+    <div class="bloc-tete"><h2>L’équipe</h2></div>
+    <p class="equipe-intro">Deux étudiants d’ESCP Business School, 21 et 22 ans, qui se destinent aux métiers des marchés. DRIVE est né d’une envie simple : poser aux professionnels les questions qu’on se pose vraiment.</p>
+    <div id="liste-equipe" class="equipe"></div>
+  </section>
+
+  <section id="ressources" class="bloc">
+    <div class="bloc-tete"><h2>Ressources</h2></div>
+    <div class="ressources">
+      <div>
+        <h3>Le lexique</h3>
+        <dl class="lexique">
+          <dt>Front office</dt><dd>Les équipes au contact des clients et du marché : sales, traders, structureurs.</dd>
+          <dt>Sales</dt><dd>Gère la relation avec les clients institutionnels (fonds, assureurs, entreprises) et leur propose des idées et des produits.</dd>
+          <dt>Trader</dt><dd>Cote des prix, prend et couvre des positions, et répond du résultat de son book.</dd>
+          <dt>Structureur</dt><dd>Conçoit des produits sur mesure en assemblant obligations et dérivés pour répondre au besoin d’un client.</dd>
+          <dt>Quant</dt><dd>Construit les modèles de valorisation et les outils de gestion du risque.</dd>
+          <dt>Dérivé</dt><dd>Contrat dont la valeur dépend d’un actif sous-jacent : action, taux, devise, matière première.</dd>
+          <dt>Option</dt><dd>Le droit, sans obligation, d’acheter (call) ou de vendre (put) un actif à un prix fixé à l’avance.</dd>
+          <dt>Delta</dt><dd>De combien bouge le prix d’une option quand le sous-jacent bouge d’une unité.</dd>
+          <dt>Volatilité implicite</dt><dd>L’amplitude de mouvement que le marché anticipe, lue dans le prix des options.</dd>
+          <dt>Autocall</dt><dd>Produit structuré remboursé par anticipation si le sous-jacent dépasse un seuil à une date d’observation. Très répandu en France.</dd>
+          <dt>Market making</dt><dd>Coter en permanence un prix d’achat et un prix de vente, et gagner l’écart entre les deux.</dd>
+          <dt>P&amp;L</dt><dd>Profit and loss : le résultat, gain ou perte, d’une position ou d’un desk.</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>Les livres</h3>
+        <ul class="livres">
+          <li><b>Options, Futures and Other Derivatives</b><span>John C. Hull. La référence sur les dérivés.</span></li>
+          <li><b>Option Volatility and Pricing</b><span>Sheldon Natenberg. La bible des traders d’options.</span></li>
+          <li><b>Volatility Trading</b><span>Euan Sinclair. Trader la volatilité, concrètement.</span></li>
+          <li><b>Dynamic Hedging</b><span>Nassim Nicholas Taleb. La couverture vue par un praticien.</span></li>
+          <li><b>Heard on the Street</b><span>Timothy Falcon Crack. Les questions d’entretien quant et trading.</span></li>
+          <li><b>A Practical Guide to Quantitative Finance Interviews</b><span>Xinfeng Zhou. Le « green book » des candidats.</span></li>
+          <li><b>Liar’s Poker</b><span>Michael Lewis. Une salle de marché des années 80, de l’intérieur.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="invite">
+    <p class="invite-titre">Vous travaillez sur les marchés ?<br>Montez à l’arrière.</p>
+    <a class="bouton bouton-noir" data-lien="email" data-sujet="Invité DRIVE" href="#">Proposer une interview</a>
+  </section>
+</main>
+
+<footer class="pied">
+  <span class="pied-mot">DRIVE</span>
+  <nav class="pied-liens" id="pied-liens" aria-label="Réseaux"></nav>
+  <span class="pied-mention">Podcast indépendant animé par des étudiants d’ESCP Business School. © <span id="annee"></span> DRIVE</span>
+</footer>
+
+<script src="contenu.js"></script>
+<script src="site.js"></script>
+<script type="importmap">{"imports":{"three":"./assets/vendor/three.module.min.js"}}</script>
+<script type="module" src="hero3d.js"></script>
+</body>
+</html>
