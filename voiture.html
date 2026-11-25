@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DRIVE · Montez à bord</title>
+<meta name="description" content="Montez dans la voiture de DRIVE : le conducteur, l’intervieweur, et la place de l’invité.">
+<meta name="robots" content="noindex">
+<meta property="og:image" content="https://lilian-jegouzo.github.io/drive/assets/og.png">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/archivo-variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="voiture.css">
+</head>
+<body>
+
+<header class="barre">
+  <a class="marque" href="./" aria-label="DRIVE, accueil">
+    <img class="marque-d" src="assets/logos/d-chrome.png" alt="DRIVE" width="54" height="42">
+  </a>
+  <nav class="nav" aria-label="Navigation principale">
+    <a href="./#episodes">Épisodes</a>
+    <a href="./#articles">Articles</a>
+    <a href="#trajet">La voiture</a>
+    <a href="./#ressources">Ressources</a>
+  </nav>
+  <a class="bouton bouton-noir petit" href="./#reseaux">Réseaux</a>
+</header>
+
+<main>
+  <!-- Le trajet : une longue zone de défilement, la scène 3D reste fixe pendant qu'on descend -->
+  <section id="trajet" class="trajet" aria-label="Visite de la voiture">
+    <div class="ecran">
+      <div id="voiture3d" class="voiture3d" aria-hidden="true"></div>
+
+      <div class="etape" data-de="0" data-a=".09">
+        <h1 class="etape-titre">Montez.</h1>
+        <p class="etape-texte">DRIVE se tourne dans un SUV. Faites défiler pour monter à bord.</p>
+        <span class="defiler" aria-hidden="true">Défiler</span>
+      </div>
+
+      <div class="etape" data-de=".12" data-a=".24">
+        <h2 class="etape-titre">Trois places.<br>Trois caméras.</h2>
+        <p class="etape-texte">Un conducteur, un intervieweur, un invité. Et une heure de route.</p>
+      </div>
+
+      <article class="fiche" data-de=".33" data-a=".50" data-siege="conducteur">
+        <span class="fiche-place">Au volant</span>
+        <h2 class="fiche-nom" data-equipe="0" data-champ="nom">Lilian Jégouzo</h2>
+        <p class="fiche-role" data-equipe="0" data-champ="role"></p>
+        <p class="fiche-bio" data-equipe="0" data-champ="bio"></p>
+      </article>
+
+      <article class="fiche" data-de=".54" data-a=".70" data-siege="interview">
+        <span class="fiche-place">À l’arrière, derrière le conducteur</span>
+        <h2 class="fiche-nom" data-equipe="1" data-champ="nom">Raphaël Chouraqui</h2>
+        <p class="fiche-role" data-equipe="1" data-champ="role"></p>
+        <p class="fiche-bio" data-equipe="1" data-champ="bio"></p>
+      </article>
+
+      <article class="fiche fiche-invite" data-de=".75" data-a="1.01" data-siege="invite">
+        <span class="fiche-place">Derrière le passager</span>
+        <h2 class="fiche-nom">Votre place.</h2>
+        <p class="fiche-bio">Trader, structureur, sales, gérant ou figure publique : la place de l’invité vous attend. Et si vous voulez accompagner DRIVE, parlons partenariat.</p>
+        <a class="bouton bouton-noir" href="#formulaire">Prendre place</a>
+      </article>
+
+      <div class="jauge" aria-hidden="true"><span></span></div>
+    </div>
+  </section>
+
+  <section id="formulaire" class="bloc formulaire">
+    <div class="bloc-tete"><h2>Prendre place</h2></div>
+    <div class="form-grille">
+      <p class="form-intro">Vous voulez monter à l’arrière pour une interview, ou accompagner DRIVE comme partenaire ? Écrivez-nous, on vous répond rapidement.</p>
+      <form id="form-contact" class="form" novalidate>
+        <fieldset class="choix">
+          <legend>Vous souhaitez</legend>
+          <label><input type="radio" name="objet" value="Être invité" checked><span>Être invité</span></label>
+          <label><input type="radio" name="objet" value="Partenariat"><span>Un partenariat</span></label>
+          <label><input type="radio" name="objet" value="Autre"><span>Autre</span></label>
+        </fieldset>
+        <label class="champ"><span>Prénom et nom</span><input name="nom" autocomplete="name" required></label>
+        <label class="champ"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
+        <label class="champ"><span>Entreprise et fonction</span><input name="fonction" autocomplete="organization-title" placeholder="Ex. trader options, banque X"></label>
+        <label class="champ"><span>Message</span><textarea name="message" rows="5" required></textarea></label>
+        <input type="text" name="_honey" class="piege" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="bouton bouton-noir" type="submit">Envoyer</button>
+        <p class="form-etat" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <span class="pied-mot">DRIVE</span>
+  <span class="pied-mention">Podcast indépendant animé par des étudiants d’ESCP Business School.</span>
+</footer>
+
+<script src="contenu.js"></script>
+<script src="voiture-page.js"></script>
+<script type="importmap">{"imports":{"three":"./assets/vendor/three.module.min.js"}}</script>
+<script type="module" src="voiture.js"></script>
+</body>
+</html>
