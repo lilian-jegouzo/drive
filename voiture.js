@@ -4,6 +4,8 @@
    siège arrière gauche (intervieweur), siège arrière droit (invité). */
 import * as THREE from 'three';
 import {RoundedBoxGeometry} from './assets/vendor/RoundedBoxGeometry.js';
+import {EXRLoader} from './assets/vendor/EXRLoader.js';
+import {Reflector} from './assets/vendor/Reflector.js';
 
 const conteneur = document.getElementById('voiture3d');
 const trajet = document.getElementById('trajet');
@@ -32,7 +34,13 @@ const panneau = (w,h,k,pos) => {const m=new THREE.Mesh(new THREE.PlaneGeometry(w
 panneau(14,10,2.2,[0,7,0]);
 panneau(22,4,1.1,[0,3.2,9]); panneau(22,4,1.1,[0,3.2,-9]); panneau(22,4,.9,[-9,3.2,0]); panneau(22,4,.9,[9,3.2,0]);
 panneau(22,.25,5,[0,1.25,8.9]); panneau(22,.25,5,[0,1.25,-8.9]); panneau(22,.18,4,[-8.9,1.6,0]); panneau(22,.18,4,[8.9,1.6,0]);
-scene.environment = new THREE.PMREMGenerator(renderer).fromScene(env, .02).texture;
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(env, .02).texture;
+// Puis un vrai studio photo (HDRI Poly Haven, domaine public) dès qu'il est chargé
+new EXRLoader().load(window.DRIVE_HDRI || 'assets/hdri/studio.exr', t => {
+  t.mapping = THREE.EquirectangularReflectionMapping; scene.environment = pmrem.fromEquirectangular(t).texture; t.dispose();
+  scene.environmentIntensity = 1;
+});
 
 const camera = new THREE.PerspectiveCamera(36, 1, .03, 100);
 
@@ -44,8 +52,17 @@ Object.assign(soleil.shadow.camera, {left:-6, right:6, top:6, bottom:-6, near:1,
 const habitacle = new THREE.PointLight(0xfff4e8, 2.2, 3.2, 2); habitacle.position.set(.7, 1.45, 0); scene.add(habitacle);
 const projecteur = new THREE.SpotLight(0xffffff, 0, 3.5, .55, .6, 1.5); scene.add(projecteur); scene.add(projecteur.target);
 
-const sol = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({opacity:.22}));
-sol.rotation.x = -Math.PI/2; sol.receiveShadow = true; scene.add(sol);
+// Sol de studio brillant : un miroir voilé de blanc, puis les ombres douces par-dessus
+const miroir = new Reflector(new THREE.CircleGeometry(18, 64), {textureWidth:1024, textureHeight:1024, color:0x9a9a9a, clipBias:.003});
+miroir.rotation.x = -Math.PI/2; scene.add(miroir);
+const voile = new THREE.Mesh(new THREE.CircleGeometry(19, 64), new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false,
+  vertexShader:'varying vec2 v; void main(){ v = position.xy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }',
+  fragmentShader:'varying vec2 v; void main(){ float d = length(v * vec2(.55, 1.)); gl_FragColor = vec4(1., 1., 1., mix(.86, 1., smoothstep(1.8, 5., d))); }'
+}));
+voile.rotation.x = -Math.PI/2; voile.position.y = .001; scene.add(voile);
+const sol = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({opacity:.28}));
+sol.rotation.x = -Math.PI/2; sol.position.y = .002; sol.receiveShadow = true; scene.add(sol);
 
 /* ---------- Matières ---------- */
 const P = o => new THREE.MeshPhysicalMaterial(o);
@@ -59,7 +76,7 @@ const cuir = P({color:'#0d0d0e', roughness:.5, clearcoat:.25, clearcoatRoughness
 const cuirClair = P({color:'#19191b', roughness:.6, clearcoat:.15, envMapIntensity:.4});
 const surpiqure = P({color:'#3a3a3e', metalness:.3, roughness:.5, envMapIntensity:.4});
 const plastique = P({color:'#141416', roughness:.45, clearcoat:.4});
-const pneu = P({color:'#111112', roughness:.85});
+const pneu = P({color:'#0b0b0c', roughness:.8, envMapIntensity:.3});
 const ecranMat = P({color:'#050506', roughness:.05, clearcoat:1, emissive:new THREE.Color('#0e1a2a'), emissiveIntensity:.6});
 const ledBlanc = new THREE.MeshBasicMaterial({color:'#ffffff'});
 const ledRouge = new THREE.MeshBasicMaterial({color:'#e0202b'});
@@ -272,7 +289,7 @@ ajoute(boite(.45, .03, 1.5, .01), plastique, 1.95, 1.02, 0, false);
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const paliers = [
   {de:0,   a:.05, pos:V(-5.4, 1.55, 4.6),  vise:V(.1, .78, 0),    decale:1},  // extérieur, trois-quarts avant
-  {de:.15, a:.2,  pos:V(4.2, 2.0, 5.0),    vise:V(.25, .8, 0),    decale:1},  // trois-quarts arrière
+  {de:.15, a:.2,  pos:V(4.9, 2.1, 5.9),    vise:V(.25, .8, 0),    decale:1},  // trois-quarts arrière
   {de:.29, a:.29, pos:V(-.05, 1.36, 2.3),  vise:V(.1, 1.0, .2),   decale:0},  // devant la vitre conducteur
   {de:.37, a:.48, pos:V(-.3, 1.34, -.74), vise:V(.16, .86, .4),  decale:0, siege:'conducteur'},
   {de:.57, a:.68, pos:V(.74, 1.36, -.12),  vise:V(1.3, .84, .44),  decale:0, siege:'interview'},
@@ -353,6 +370,7 @@ renderer.setAnimationLoop(() => {
     projecteur.position.copy(lumiere); projecteur.target.position.set(pl.position.x + .15, .7, pl.position.z);
   }
   projecteur.intensity = 9 * force;
+  miroir.visible = voile.visible = p < .33;
   habitacle.intensity = 2.2 * lisse(Math.min(1, Math.max(0, (p - .22) / .1)));
   etapes.forEach(e => e.classList.toggle('vue', p >= +e.dataset.de && p < +e.dataset.a));
   placerFiches(p);

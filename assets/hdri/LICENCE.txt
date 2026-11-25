@@ -1,0 +1,1 @@
+studio.exr : Poly Haven, licence CC0 (domaine public), via @pmndrs/assets.
