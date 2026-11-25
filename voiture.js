@@ -1,5 +1,5 @@
 /* DRIVE · la voiture en 3D, pilotée par le défilement.
-   Un grand SUV sans marque (modèle 3D libre de droits, logos retirés, habitacle noir).
+   Un SUV coupé bleu nuit sans marque (modèle 3D libre de droits, logos retirés), avec un habitacle détaillé en cuir noir.
    La caméra suit un trajet : extérieur, entrée par la vitre conducteur, siège conducteur,
    siège arrière gauche (intervieweur), siège arrière droit (invité). */
 import * as THREE from 'three';
@@ -67,7 +67,7 @@ sol.rotation.x = -Math.PI/2; sol.position.y = .002; sol.receiveShadow = true; sc
 
 /* ---------- La voiture : modèle 3D (sans logos, plaques DRIVE, intérieur noir) ---------- */
 const P = o => new THREE.MeshPhysicalMaterial(o);
-const peinture = P({color:'#0b0b0d', metalness:.6, roughness:.32, clearcoat:1, clearcoatRoughness:.03});
+const peinture = P({color:'#08101f', metalness:.62, roughness:.3, clearcoat:1, clearcoatRoughness:.03}); // bleu nuit, presque noir
 const vitre = P({color:'#0b0c0e', metalness:.1, roughness:.02, clearcoat:1, clearcoatRoughness:.02, transparent:true, opacity:.86, side:THREE.DoubleSide, depthWrite:false});
 // Matières « de près » : un seul correctif de shader qui ajoute
 //  - les ombres de contact cuites dans les couleurs de sommets (elles assombrissent aussi les reflets,
@@ -112,7 +112,7 @@ function matiere(m, {ao = true, grain = 0, freq = 160, paillettes = 0} = {}){
   m.customProgramCacheKey = () => `detail-${ao}-${grain}-${freq}-${paillettes}`;
   return m;
 }
-matiere(peinture, {ao:false, paillettes:.35});
+matiere(peinture, {paillettes:.35}); // ombres de contact cuites dans les sommets de la carrosserie
 
 // Écrans de bord : l'écran central et le combiné d'instruments, dessinés aux couleurs de DRIVE.
 // Les deux dalles sont plus larges que leur texture (2,7:1 pour 2:1) : on dessine dans un repère élargi.
@@ -167,55 +167,88 @@ function ecranTexture(type){
 }
 
 const voiture = new THREE.Group(); scene.add(voiture);
-const places = {conducteur:{x:-.12, z:.36}, interview:{x:.72, z:.43}, invite:{x:.72, z:-.45}}; // centres des sièges (repère de la voiture)
+const places = {conducteur:{x:.1, z:.4}, interview:{x:.92, z:.42}, invite:{x:.92, z:-.42}}; // centres des sièges (repère de la voiture)
 const vitres = [];
-new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(window.DRIVE_GLB || 'assets/modeles/voiture.glb', gltf => {
-  const m = gltf.scene;
-  m.rotation.y = -Math.PI/2; // l'avant vers -x, le conducteur côté +z
+const chargeur = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+const echec = e => { console.error(e); document.body.classList.add('sans-3d'); };
+
+// Écran : l'image remplit exactement la dalle (coordonnées de texture compressées, parfois hors de 0-1)
+function ecranSur(o, mt, type){
+  const t = ecranTexture(type), src = mt.map || mt.emissiveMap || mt.normalMap;
+  const uv = o.geometry.attributes.uv, R = src ? src.repeat : new THREE.Vector2(1, 1), O = src ? src.offset : new THREE.Vector2();
+  let u0 = 1e9, u1 = -1e9, v0 = 1e9, v1 = -1e9;
+  for (let i = 0; i < uv.count; i++){ const u = uv.getX(i) * R.x + O.x, v = uv.getY(i) * R.y + O.y; u0 = Math.min(u0, u); u1 = Math.max(u1, u); v0 = Math.min(v0, v); v1 = Math.max(v1, v); }
+  t.repeat.set(R.x / (u1 - u0), R.y / (v1 - v0)); t.offset.set((O.x - u0) / (u1 - u0), (O.y - v0) / (v1 - v0));
+  o.castShadow = false;
+  return new THREE.MeshPhysicalMaterial({color:'#000', emissive:'#fff', emissiveIntensity:.95, emissiveMap:t, roughness:.08, clearcoat:1, clearcoatRoughness:.03, envMapIntensity:.5});
+}
+function habiller(m, regle){
   m.traverse(o => {
     if (!o.isMesh) return;
     o.castShadow = true; o.receiveShadow = true;
     const mats = Array.isArray(o.material) ? o.material : [o.material];
-    const nouv = mats.map(mt => {
-      const n = mt.name || '';
-      if (n.startsWith('bodypaint')) return peinture;
-      if (n.startsWith('IntWindows') || n.startsWith('ExtWindowsGlass_0')){ vitres.push(o); o.castShadow = false; o.renderOrder = 3; return vitre; }
-      if (n.startsWith('ExtWindowsGlass')){ mt.depthWrite = false; o.castShadow = false; o.renderOrder = 2; return mt; } // optiques
-      if (n.startsWith('interiordfs_0') || n.startsWith('interiordfs_1')){ o.castShadow = false;
-        const t = ecranTexture(n.startsWith('interiordfs_0') ? 'Ecran' : 'Compteurs'), src = mt.map || mt.emissiveMap || mt.normalMap;
-        // l'image remplit exactement la dalle : on recale les coordonnées de texture (compressées, et parfois hors de 0-1)
-        const uv = o.geometry.attributes.uv, R = src ? src.repeat : new THREE.Vector2(1, 1), O = src ? src.offset : new THREE.Vector2();
-        let u0 = 1e9, u1 = -1e9, v0 = 1e9, v1 = -1e9;
-        for (let i = 0; i < uv.count; i++){ const u = uv.getX(i) * R.x + O.x, v = uv.getY(i) * R.y + O.y; u0 = Math.min(u0, u); u1 = Math.max(u1, u); v0 = Math.min(v0, v); v1 = Math.max(v1, v); }
-        t.repeat.set(R.x / (u1 - u0), R.y / (v1 - v0)); t.offset.set((O.x - u0) / (u1 - u0), (O.y - v0) / (v1 - v0));
-        return new THREE.MeshPhysicalMaterial({color:'#000', emissive:'#fff', emissiveIntensity:.95, emissiveMap:t, roughness:.08, clearcoat:1, clearcoatRoughness:.03, envMapIntensity:.5}); }
-      if (/^(interiordfs\.|plastic5_18|leather02_weave_32|leather02_weave_2\.)/.test(n)){ o.visible = false; return mt; } // vitre noire et pictos posés devant les écrans d'origine
-      if (n.startsWith('Tire')){ mt.envMapIntensity = .6; }
-      const cuir = /^(plastic5_2\.|plastic5_17|plastic5_12|ptn_leather|leather02_weave_(0|10|8|12|14|15|20)\.)/.test(n);
-      if (o.geometry.attributes.color) matiere(mt); // ombres de contact de l'habitacle
-      if (cuir){ mt.envMapIntensity = .55; }
-      return mt;
-    });
+    const nouv = mats.map(mt => regle(o, mt, mt.name || ''));
     o.material = Array.isArray(o.material) ? nouv : nouv[0];
+  });
+}
+
+// 1. La carrosserie (GLC sans logos, plaques DRIVE), peinte en bleu nuit ; son intérieur d'origine est remplacé
+let carrosseriePrete = false, habitaclePret = false;
+const pret = () => { if (carrosseriePrete && habitaclePret) window.__voiturePrete = true; };
+chargeur.load(window.DRIVE_GLB || 'assets/modeles/carrosserie.glb', gltf => {
+  const m = gltf.scene;
+  m.rotation.y = -Math.PI/2; // l'avant vers -x, le conducteur côté +z
+  habiller(m, (o, mt, n) => {
+    if (n.startsWith('Blue paint')){ peinture.side = THREE.DoubleSide; if (params.has('xray')){ peinture.transparent = true; peinture.opacity = .25; peinture.depthWrite = false; } return peinture; }
+    if (n === 'Interior' || n === 'Ecran' || n.startsWith('Compteur')){ o.visible = false; return mt; }
+    if (n === 'Glass'){ vitres.push(o); o.castShadow = false; o.renderOrder = 3; return vitre; }
+    if (n === 'Grates'){ mt.transparent = false; mt.alphaTest = .5; mt.side = THREE.DoubleSide; }
+    if (n === 'Lights'){ mt.emissiveMap = mt.map; mt.emissive = new THREE.Color(.2, .2, .2); }
+    if (n === 'Wheel') mt.color.setScalar(.55);
+    if (n === 'Body') mt.side = THREE.DoubleSide; // l'envers des portières, vu depuis l'habitacle
+    if (o.geometry.attributes.color && mt !== peinture) matiere(mt);
+    if (params.has('xray')){ mt.transparent = true; mt.opacity = .25; mt.depthWrite = false; }
+    return mt;
   });
   voiture.add(m);
   // posée au sol, centrée entre les essieux
   m.updateMatrixWorld(true); const bb = new THREE.Box3().setFromObject(m, true);
   m.position.y -= bb.min.y; m.position.x -= (bb.min.x + bb.max.x)/2; m.position.z -= (bb.min.z + bb.max.z)/2;
-  window.__voiturePrete = true;
-}, undefined, e => { console.error(e); document.body.classList.add('sans-3d'); });
+  carrosseriePrete = true; pret();
+}, undefined, echec);
+
+// 2. L'habitacle détaillé (sièges, planche de bord, volant, contre-portes, ciel de toit), recalé dans la carrosserie
+const cabine = new THREE.Group(); voiture.add(cabine);
+const coupes = [new THREE.Plane(new THREE.Vector3(-1, 0, 0), +(params.get('coupe') || 1.38))]; renderer.localClippingEnabled = true;
+{ const k = (params.get('hab') || '.08,-.16,.02,1,.9,.86').split(',').map(Number);
+  cabine.position.set(k[0], k[1], k[2]); cabine.scale.set(k[3], k[4], k[5]); }
+chargeur.load(window.DRIVE_HAB || 'assets/modeles/habitacle.glb', gltf => {
+  const m = gltf.scene;
+  m.rotation.y = -Math.PI/2; m.position.set(.467, .0565, -.038);
+  habiller(m, (o, mt, n) => {
+    if (n.startsWith('interiordfs_0')) return ecranSur(o, mt, 'Ecran');
+    if (n.startsWith('interiordfs_1')) return ecranSur(o, mt, 'Compteurs');
+    if (/^(interiordfs\.|plastic5_18|leather02_weave_32|leather02_weave_2\.)/.test(n)){ o.visible = false; return mt; } // vitre noire et pictos posés devant les écrans d'origine
+    if (o.geometry.attributes.color) matiere(mt); // ombres de contact
+    mt.clippingPlanes = coupes; // le coffre du modèle d'origine dépasserait sous la lunette fuyante
+    if (/^(plastic5_2\.|plastic5_17|plastic5_12|ptn_leather|leather02_weave_(0|10|8|12|14|15|20)\.)/.test(n)) mt.envMapIntensity = .55; // cuir
+    return mt;
+  });
+  cabine.add(m);
+  habitaclePret = true; pret();
+}, undefined, echec);
 
 /* ---------- Trajet de la caméra ---------- */
 // Chaque étape : [début, fin] du palier, position de la caméra, point regardé.
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const paliers = [
-  {de:0,   a:.05, pos:V(-5.3, 1.6, 4.5),   vise:V(.1, .88, 0),    decale:1},  // extérieur, trois-quarts avant
-  {de:.15, a:.2,  pos:V(6.0, 2.4, 6.9),    vise:V(.25, .88, 0),   decale:1.2},  // trois-quarts arrière
-  {de:.29, a:.29, pos:V(-.05, 1.5, 2.1),   vise:V(-.05, 1.25, .2), decale:0},  // devant la vitre conducteur
-  {de:.37, a:.48, pos:V(-.45, 1.6, -.15),  vise:V(.15, 1.05, .36), decale:0, siege:'conducteur'}, // depuis le pare-brise, comme la caméra du tournage
-  {de:.525, a:.525, pos:V(-.05, 1.6, 0),   vise:V(.9, 1.0, 0),    decale:0},                     // entre les sièges avant
-  {de:.58, a:.68, pos:V(.45, 1.62, -.35),  vise:V(.85, 1.05, .43),  decale:0, siege:'interview'},  // en diagonale, vers Raphaël
-  {de:.79, a:1,   pos:V(.45, 1.62, .35),   vise:V(.85, 1.05, -.45), decale:0, siege:'invite'}       // en diagonale, vers la place de l'invité
+  {de:0,   a:.05, pos:V(-4.75, 1.45, 4.05), vise:V(.1, .7, 0),    decale:1},  // extérieur, trois-quarts avant
+  {de:.15, a:.2,  pos:V(5.2, 2.15, 6.2),   vise:V(.25, .72, 0),   decale:1.2},  // trois-quarts arrière
+  {de:.29, a:.29, pos:V(-.1, 1.3, 2.2),    vise:V(-.05, 1.0, .2), decale:0},  // devant la vitre conducteur
+  {de:.37, a:.48, pos:V(-.6, 1.32, -.18),  vise:V(.2, 1.0, .43), decale:0, siege:'conducteur'}, // depuis le pare-brise, comme la caméra du tournage
+  {de:.525, a:.525, pos:V(.15, 1.45, 0),   vise:V(1.0, .9, 0),    decale:0},                     // entre les sièges avant
+  {de:.58, a:.68, pos:V(.52, 1.33, -.36),  vise:V(1.15, 1.04, .42),  decale:0, siege:'interview'},  // en diagonale, vers Raphaël
+  {de:.79, a:1,   pos:V(.52, 1.33, .36),   vise:V(1.15, 1.04, -.42), decale:0, siege:'invite'}       // en diagonale, vers la place de l'invité
 ];
 const pos = new THREE.Vector3(), vise = new THREE.Vector3();
 let decale = 1;
@@ -230,7 +263,7 @@ function cameraA(p){
   }
 }
 // Vers l'extérieur, la caméra recule sur écran étroit pour garder la voiture entière
-function recul(p){ const a = camera.aspect, k = a >= 1.75 ? 0 : .3 * (1.75 - Math.max(a, 1.2)) + .72 * Math.max(0, 1.2 - a); return 1 + k * (1 - lisse(Math.min(1, Math.max(0, (p - .2) / .09)))); }
+function recul(p){ const a = camera.aspect, k = a >= 1.75 ? 0 : .45 * (1.75 - Math.max(a, 1.2)) + 1.1 * Math.max(0, 1.2 - a); return 1 + k * (1 - lisse(Math.min(1, Math.max(0, (p - .2) / .09)))); }
 
 /* ---------- Fiches posées sur les sièges ---------- */
 const ancres = {conducteur:V(.15, 1.45, .36), interview:V(.95, 1.4, .43), invite:V(.95, 1.4, -.45)};
@@ -275,7 +308,7 @@ renderer.setAnimationLoop(() => {
   if (f !== 1) pos.sub(vise).multiplyScalar(f).add(vise);
   // Champ de vision : serré dehors, large dans l'habitacle
   const dedans = lisse(Math.min(1, Math.max(0, (p - .27) / .1)));
-  const fov = (camera.aspect < 1 ? 50 : 36) + dedans * (camera.aspect < 1 ? 22 : 20);
+  const fov = (camera.aspect < 1 ? 50 : 36) + dedans * (camera.aspect < 1 ? 28 : 32); // grand-angle dans l'habitacle
   if (Math.abs(camera.fov - fov) > .01){ camera.fov = fov; camera.updateProjectionMatrix(); }
   camera.position.copy(pos); camera.lookAt(vise);
   // À l'extérieur, la voiture se décale pour laisser la place au texte (à droite sur ordinateur, en bas sur téléphone)
