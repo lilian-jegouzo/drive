@@ -4,6 +4,7 @@
    siège arrière gauche (intervieweur), siège arrière droit (invité). */
 import * as THREE from 'three';
 import {GLTFLoader} from './assets/vendor/GLTFLoader.js';
+import {MeshoptDecoder} from './assets/vendor/meshopt_decoder.module.js';
 import {EXRLoader} from './assets/vendor/EXRLoader.js';
 import {Reflector} from './assets/vendor/Reflector.js';
 
@@ -66,12 +67,23 @@ sol.rotation.x = -Math.PI/2; sol.position.y = .002; sol.receiveShadow = true; sc
 
 /* ---------- La voiture : modèle 3D (sans logos, plaques DRIVE, intérieur noir) ---------- */
 const P = o => new THREE.MeshPhysicalMaterial(o);
-const peinture = P({color:'#0b0b0d', metalness:.6, roughness:.32, clearcoat:1, clearcoatRoughness:.03});
+const peinture = P({color:'#0b0b0d', metalness:.6, roughness:.32, clearcoat:1, clearcoatRoughness:.03, vertexColors:true}); // ombres de contact cuites dans les sommets
 const vitre = P({color:'#0b0c0e', metalness:.1, roughness:.02, clearcoat:1, clearcoatRoughness:.02, transparent:true, opacity:.86, side:THREE.DoubleSide, depthWrite:false});
+// Les ombres de contact (cuites dans les couleurs de sommets) assombrissent aussi les reflets :
+// sans cela, les joints de portes et les plis des sièges brilleraient comme des surfaces exposées.
+const occlusion = m => { m.vertexColors = true; m.onBeforeCompile = sh => {
+  sh.fragmentShader = sh.fragmentShader.replace('#include <aomap_fragment>', `#include <aomap_fragment>
+  { float aoS = clamp(vColor.r, 0., 1.); reflectedLight.indirectDiffuse *= aoS; reflectedLight.indirectSpecular *= aoS * aoS;
+  #if defined( USE_CLEARCOAT )
+  clearcoatSpecularIndirect *= aoS * aoS;
+  #endif
+  }`);
+}; m.customProgramCacheKey = () => 'ao-sommets'; return m; };
+occlusion(peinture);
 const voiture = new THREE.Group(); scene.add(voiture);
 const places = {conducteur:{x:.1, z:.43}, interview:{x:.92, z:.45}, invite:{x:.92, z:-.45}}; // centres des sièges (repère de la voiture)
 const vitres = [];
-new GLTFLoader().load(window.DRIVE_GLB || 'assets/modeles/voiture.glb', gltf => {
+new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(window.DRIVE_GLB || 'assets/modeles/voiture.glb', gltf => {
   const m = gltf.scene;
   m.rotation.y = -Math.PI/2; // l'avant vers -x, le conducteur côté +z
   m.traverse(o => {
@@ -85,7 +97,8 @@ new GLTFLoader().load(window.DRIVE_GLB || 'assets/modeles/voiture.glb', gltf => 
       if (n === 'Grates'){ mt.transparent = false; mt.alphaTest = .5; mt.side = THREE.DoubleSide; }
       if (n === 'Interior'){ mt.side = THREE.DoubleSide; mt.envMapIntensity = .5; mt.roughness = 1.6; } // cuir satiné, pas vernis
       if (n === 'Lights'){ mt.emissiveMap = mt.map; mt.emissive = new THREE.Color(.2, .2, .2); }
-      if (n === 'Wheel') mt.color.setScalar(.7);
+      if (n === 'Wheel') mt.color.setScalar(.55);
+      if (o.geometry.attributes.color && mt !== peinture) occlusion(mt);
       return mt;
     });
     o.material = Array.isArray(o.material) ? nouv : nouv[0];
@@ -101,8 +114,8 @@ new GLTFLoader().load(window.DRIVE_GLB || 'assets/modeles/voiture.glb', gltf => 
 // Chaque étape : [début, fin] du palier, position de la caméra, point regardé.
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const paliers = [
-  {de:0,   a:.05, pos:V(-5.4, 1.55, 4.6),  vise:V(.1, .72, 0),    decale:1},  // extérieur, trois-quarts avant
-  {de:.15, a:.2,  pos:V(4.9, 2.1, 5.9),    vise:V(.25, .75, 0),   decale:1},  // trois-quarts arrière
+  {de:0,   a:.05, pos:V(-4.75, 1.45, 4.05), vise:V(.1, .7, 0),    decale:1},  // extérieur, trois-quarts avant
+  {de:.15, a:.2,  pos:V(5.2, 2.15, 6.2),   vise:V(.25, .72, 0),   decale:1.2},  // trois-quarts arrière
   {de:.29, a:.29, pos:V(-.1, 1.3, 2.2),    vise:V(-.05, 1.0, .2), decale:0},  // devant la vitre conducteur
   {de:.37, a:.48, pos:V(-.6, 1.32, -.18),  vise:V(.2, 1.0, .43), decale:0, siege:'conducteur'}, // depuis le pare-brise, comme la caméra du tournage
   {de:.525, a:.525, pos:V(.15, 1.45, 0),   vise:V(1.0, .9, 0),    decale:0},                     // entre les sièges avant
@@ -122,7 +135,7 @@ function cameraA(p){
   }
 }
 // Vers l'extérieur, la caméra recule sur écran étroit pour garder la voiture entière
-function recul(p){ const a = camera.aspect; return a >= 1.2 ? 1 : 1 + (1.2 - a) * .9 * (1 - lisse(Math.min(1, Math.max(0, (p - .2) / .09)))); }
+function recul(p){ const a = camera.aspect, k = a >= 1.75 ? 0 : .45 * (1.75 - Math.max(a, 1.2)) + 1.1 * Math.max(0, 1.2 - a); return 1 + k * (1 - lisse(Math.min(1, Math.max(0, (p - .2) / .09)))); }
 
 /* ---------- Fiches posées sur les sièges ---------- */
 const ancres = {conducteur:V(.32, 1.3, .43), interview:V(1.18, 1.24, .45), invite:V(1.18, 1.24, -.45)};
